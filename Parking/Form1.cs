@@ -20,17 +20,33 @@ namespace Parking
         {
             InitializeComponent();
             cameraModel = new CameraModel();
+            dateTimePicker1.Format = DateTimePickerFormat.Custom;
+            dateTimePicker1.CustomFormat = "MM/dd/yyyy hh:mm:ss";
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            /*
+            
             CameraModel model;
-            using (StreamReader reader = new StreamReader("C:\\File.txt", Encoding.Default))
+            try
             {
-                model = new CameraModel(reader.ReadLine().Split('|'));
+                using (StreamReader reader = new StreamReader(textBox6.Text, Encoding.Default))
+                {
+                    if (reader.ReadLine().Split('|').Count() == 3)
+                    {
+                        model = new CameraModel(reader.ReadLine().Split('|'));
+                        parking.addTranscation(model);
+                        updateDataGridView1();
+                    } else
+                    {
+                        MessageBox.Show("Неправильная структура файла");
+                    }
+                }
+            } catch
+            {
+                MessageBox.Show("Файл не найден");
             }
-            */
+           
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -151,7 +167,7 @@ namespace Parking
                             showDecisionInfo(searchTransaction(transaction));
                             break;
                         case "-":
-
+                            checkPayment(transaction);
                             break;
                         default:
                             MessageBox.Show("Направление не распознано.");
@@ -162,6 +178,28 @@ namespace Parking
             {
                 MessageBox.Show("нет свободных парковочных мест");
             }
+        }
+
+        private void checkPayment (CameraModel transaction)
+        {
+            foreach (CameraModel model in data)
+            {
+                if (model.carNumber == transaction.carNumber)
+                {
+                    TimeSpan span = Convert.ToDateTime(transaction.date) - Convert.ToDateTime(model.date);
+                    double sum = (span.Hours + ((span.Minutes > 0) ? 1 : 0)) * pricePerHour;
+                    double fullDeposit = getFullDeposit(transaction.carNumber);
+                    if (sum <= fullDeposit)
+                    {
+                        showDecisionInfo(searchTransaction(transaction));
+                    } else
+                    {
+                        MessageBox.Show("Красный. Неоплачена парковка");
+                    }
+                    return;
+                }
+            }
+            MessageBox.Show("Не найден въезд этой машины");
         }
 
         public List<CameraModel> transactions ()
