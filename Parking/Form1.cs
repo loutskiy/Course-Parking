@@ -26,15 +26,16 @@ namespace Parking
 
         private void button1_Click(object sender, EventArgs e)
         {
-            
-            CameraModel model;
+
             try
-            {
+           {
                 using (StreamReader reader = new StreamReader(textBox6.Text, Encoding.Default))
                 {
-                    if (reader.ReadLine().Split('|').Count() == 3)
+                string[] array = reader.ReadLine().Split('|');
+                    if (array.Count() == 3)
                     {
-                        model = new CameraModel(reader.ReadLine().Split('|'));
+                   // Console.WriteLine((reader.ReadLine().Split('|')));
+                CameraModel model = new CameraModel(array);
                         parking.addTranscation(model);
                         updateDataGridView1();
                     } else
@@ -44,7 +45,7 @@ namespace Parking
                 }
             } catch
             {
-                MessageBox.Show("Файл не найден");
+               MessageBox.Show("Файл не найден");
             }
            
         }
